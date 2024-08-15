@@ -1,8 +1,8 @@
 module.exports = {
   
-    name: "Interaction Reply Block (FIXED)",
+    name: "Interaction Reply Block (v14)",
 
-    description: "this block simply makes djs work with modals",
+    description: "Sends a reply to an interaction",
 
     category: ".MOD",
 
@@ -17,13 +17,13 @@ module.exports = {
             "id": "interactreply",
             "name": "Interaction",
             "description": "Type: Action\n\nDescription: Executes the following blocks when this block finishes its task.",
-            "types": ["object"]
+            "types": ["object", "unspecified"]
         },
         {
             "id": "message",
             "name": "Text",
             "description": "Type: Action\n\nDescription: Executes the following blocks when this block finishes its task.",
-            "types": ["text"]
+            "types": ["text", "unspecified"]
         },
         {
             id: "embeds",
@@ -50,11 +50,12 @@ module.exports = {
             types: ["object", "unspecified"],
         },
         {
-            id: "attachment",
-            name: "Attachment",
-            description: "Acceptable Types: Object, Text, Unspecified\n\nDescription: The attachment to put in the message. Supports Image, file path and URL. (OPTIONAL)",
-            types: ["object", "text", "unspecified"]
+            id: "file",
+            name: "File Path",
+            description: "Description: To add a file to the message",
+            types: ["text", "object", "unspecified"],
         }
+
     ],
 
     options: [
@@ -81,7 +82,7 @@ module.exports = {
             "id": "message",
             "name": "Message",
             "description": "Type: Action\n\nDescription: Executes the following blocks when this block finishes its task.",
-            "types": ["object"]
+            "types": ["object", "unspecified"]
         }
     ],
 
@@ -91,10 +92,10 @@ module.exports = {
         const inter = this.GetInputValue("interactreply", cache);
         const msg = this.GetInputValue("message", cache);
         const em = this.GetInputValue("embeds", cache);
-        const attachment = this.GetInputValue("attachment", cache);  
         const button1 = this.GetInputValue("button", cache);
 		const button_row = this.GetInputValue("button_row", cache);
         const menu1 = this.GetInputValue("menu", cache);
+        const file = this.GetInputValue("file", cache);
         let components;
         let button;
         let menu;
@@ -138,16 +139,16 @@ module.exports = {
 
 
         if(em !== undefined) {
-            inter.reply({ content: msg, files: attachment ? [attachment] : null, embeds: [em], components: components, ephemeral: awnser });
+            inter.reply({ content: msg, embeds: [em], files: file ? [file] : null, components: components, ephemeral: awnser });
             const message = await inter.fetchReply();
             this.StoreOutputValue(message, "message", cache);
             this.RunNextBlock("action", cache);
         } else {
             inter.reply({
                 content: msg,
+                files: file ? [file] : null,
                 components: components,
-                ephemeral: awnser,
-                files: attachment ? [attachment] : null
+                ephemeral: awnser
             })
 
             const message = await inter.fetchReply();

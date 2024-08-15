@@ -3,7 +3,7 @@ module.exports = {
 
     description: "Leaves the voice channel.",
 
-    category: "Audio Stuff",
+    category: ".Audio V2",
 
     inputs: [
         {
@@ -13,9 +13,9 @@ module.exports = {
             "types": ["action"]
         },
         {
-            "id": "connection",
-            "name": "Connection",
-            "description": "Acceptable Types: Object, Unspecified\n\nDescription: The Voice Connection",
+            "id": "guild",
+            "name": "Server",
+            "description": "Acceptable Types: Object, Unspecified\n\nDescription: The Guild to get the Voice Connection from!",
             "types": ["object", "unspecified"],
             "required": true
         }
@@ -33,8 +33,10 @@ module.exports = {
     ],
 
     async code(cache) {
+        const { getVoiceConnection } = await this.require('@discordjs/voice');
+        const guild = this.GetInputValue("guild", cache);
 
-        const connection = this.GetInputValue("connection", cache);
+        const connection = await getVoiceConnection(guild.id);
 
         await connection.destroy();
 

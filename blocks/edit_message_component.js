@@ -26,10 +26,10 @@ module.exports = {
             types: ["text", "unspecified"]
         },
         {
-            id: "embed",
-            name: "Embed",
-            description: "Description: To add a single Button to the Message. (NOT A ROW) (MUST EITHER BE BUTTON OR ROW -- NOT BOTH --)",
-            types: ["object", "unspecified"],
+            id: "embeds",
+            name: "Embed(s)",
+            description: "Description: The embed to reply with. Accepts: Object & List",
+            types: ["object", "list", "unspecified"],
         },
         {
             id: "row1",
@@ -94,7 +94,7 @@ module.exports = {
 
         const message = this.GetInputValue("message", cache);
         const msg = this.GetInputValue("text", cache);
-        const embed = this.GetInputValue("embed", cache);
+        const em = this.GetInputValue("embeds", cache);
         const comp1 = this.GetInputValue("row1", cache);
         const comp2 = this.GetInputValue("row2", cache);
         const comp3 = this.GetInputValue("row3", cache);
@@ -175,7 +175,7 @@ module.exports = {
         }
         
 
-        message.edit({ content: msg ? msg : undefined, embeds: embed ? [embed] : undefined, files: file ? [file] : undefined, components: comps ? comps : undefined}).then( msg => {
+        message.edit({ content: msg ? msg : undefined, embeds: em ? Array.isArray(em) ? em : [em] : undefined, files: file ? [file] : undefined, components: comps ? comps : undefined}).then( msg => {
             this.StoreOutputValue(msg, "message", cache);
             this.RunNextBlock("action", cache);
         })

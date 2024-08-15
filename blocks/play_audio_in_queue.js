@@ -157,7 +157,7 @@ module.exports = {
         } else {
             leaveonend = false;
         }
-        const { useMasterPlayer, QueryType, useQueue } = require("discord-player");
+        const { useMainPlayer, QueryType, useQueue } = require("discord-player");
         const action = this.GetOptionValue("action", cache);
 
         let querytype;
@@ -184,7 +184,7 @@ module.exports = {
             querytype = QueryType.AUTO
         }
 
-        const player = useMasterPlayer();
+        const player = useMainPlayer();
         try {
             let queue = useQueue(vc.guild.id);
             if (queue) if (source == "radio" && queue.isPlaying() && action !== "play") await queue.node.skip()
@@ -194,7 +194,7 @@ module.exports = {
                     metadata: {
                         channel: vc
                     },
-                    autoSelfDeaf: autoselfdeaf,
+                    selfDeaf: autoselfdeaf,
                     volume: initialvolume,
                     leaveOnEmpty: leaveonempty,
                     leaveOnEmptyCooldown: emptycooldown,
@@ -203,7 +203,7 @@ module.exports = {
                     connectionTimeout: 999999999
                 }
             })
-            if (action == "play") {
+            if (action === "play") {
                 if (res.queue.isPlaying()) {
                     res.queue.node.skipTo(res.track);
                 }

@@ -113,7 +113,7 @@ module.exports = {
     code (cache) {
         const { EmbedBuilder } = require('discord.js');
         const message_embed = this.GetInputValue("message_embed", cache);
-        const color = this.GetInputValue("color", cache, false, "#2f3136");
+        const color = this.GetInputValue("color", cache);
         const thumbnail = this.GetInputValue("thumbnail", cache);
         const author_icon = this.GetInputValue("author_icon", cache);
         const author_name = this.GetInputValue("author_name", cache);

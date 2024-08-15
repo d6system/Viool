@@ -46,7 +46,8 @@ module.exports = {
                 11: "Playback Time [Number]",
                 12: "Eta Playback Time [Number]",
                 13: "Volume [Number]",
-                14: "Timestamp [Object]"
+                14: "Timestamp [Object]",
+                15: "Queue Exists? [Boolean]"
             }
         }
     ],
@@ -56,6 +57,12 @@ module.exports = {
             "id": "action",
             "name": "Action",
             "description": "Type: Action\n\nDescription: Executes the following blocks when this block finishes its task.",
+            "types": ["action"]
+        },
+        {
+            "id": "actionerr",
+            "name": "Action (NoQueue)",
+            "description": "Type: Action\n\nDescription: This will run if the Queue Doesn't exist or an error occured.",
             "types": ["action"]
         },
         {
@@ -77,14 +84,18 @@ module.exports = {
         } else if (temp) {
             queue = temp;
         } else {
-            throw new ReferenceError("Queue is not defined!")
+            return this.RunNextBlock("actionerr", cache) && this.StoreOutputValue("No Server or Queue Specified! Contact the Bot Administrator", "result", cache);
         }
+
+        if(!queue) return this.RunNextBlock("actionerr", cache) && this.StoreOutputValue("Queue Doesn't Exist!", "result", cache);
+
+
         const { QueueRepeatMode } = require("discord-player");
 
         let result;
         switch (queue_info) {
             case 1:
-                result = queue.tracks.toArray();
+                result = queue.tracks.data;
                 break;
             case 2:
                 result = queue.node.isPlaying();
@@ -102,20 +113,20 @@ module.exports = {
                 result = queue.history.previousTrack;
                 break;
             case 7:
-                if (queue.repeatMode == QueueRepeatMode.OFF) {
+                if (queue.repeatMode === QueueRepeatMode.OFF) {
                     result = "Off";
-                } else if (queue.repeatMode == QueueRepeatMode.QUEUE) {
+                } else if (queue.repeatMode === QueueRepeatMode.QUEUE) {
                     result = "Queue";
-                } else if (queue.repeatMode == QueueRepeatMode.TRACK) {
+                } else if (queue.repeatMode === QueueRepeatMode.TRACK) {
                     result = "Track";
-                } else if (queue.repeatMode == QueueRepeatMode.AUTOPLAY) {
+                } else if (queue.repeatMode === QueueRepeatMode.AUTOPLAY) {
                     result = "Autoplay";
                 } else {
                     result = queue.repeatMode;
                 }
                 break;
             case 8:
-                result = queue.metadata.channel;
+                result = queue.currentTrack;
                 break;
             case 9:
                 result = queue.connection.channel;
@@ -134,6 +145,9 @@ module.exports = {
                 break;
             case 14:
                 result = await queue.node.getTimestamp();
+                break;
+            case 15:
+                result = queue ? true : false;
                 break;
         }
 

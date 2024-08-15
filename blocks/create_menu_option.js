@@ -8,7 +8,33 @@ module.exports = {
             name: "Action",
             description: "Type: Action\n\nDescription: Executes this block.",
             types: ["action"]
+        },
+        {
+            id: "label",
+            name: "Label",
+            description: "Description: The Label of the Button.",
+            types: ["text","unspecified"]
+        },
+		{
+            id: "description",
+            name: "Description",
+            description: "Description: The ID or URL of the Button.",
+            types: ["text","unspecified"]
+        },
+		{
+            id: "value",
+            name: "Value",
+            description: "Description: The value of the menu component.",
+            types: ["text","unspecified"]
+        },
+        {
+            id: "emoji",
+            name: "Emoji",
+            description: "Description: The value of the menu component.",
+            types: ["text","unspecified"]
         }
+
+
     ],
     options: [
         {
@@ -52,10 +78,33 @@ module.exports = {
     ],
     async code(cache) {
 
-        const label = this.GetOptionValue("label", cache);
-        const description = this.GetOptionValue("description", cache);
-        const value = this.GetOptionValue("value", cache);
-        const emoji = this.GetOptionValue("emoji", cache);
+        var label = this.GetInputValue("label", cache);
+        var description = this.GetInputValue("description", cache);
+        var value = this.GetInputValue("value", cache);
+        var emoji = this.GetInputValue("emoji", cache);
+
+
+        if(label == undefined) {
+            label = this.GetOptionValue("label", cache);
+        }
+
+        if(description == undefined) {
+            description = this.GetOptionValue("description", cache);
+        }
+
+        if(value == undefined) {
+            value = this.GetOptionValue("value", cache);
+        }
+        if(emoji == undefined) {
+            emoji = this.GetOptionValue("emoji", cache);
+        }
+
+        
+
+        if (description == '') {
+            var description = " ";
+        }
+
 
         const menu_object = {
             label,
@@ -63,6 +112,7 @@ module.exports = {
             value,
             emoji: emoji
         }
+        
          
         if(!emoji) delete menu_object.emoji;
          

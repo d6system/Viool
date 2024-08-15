@@ -95,8 +95,8 @@ module.exports = {
         time = typeof time == "object" ? Date.now() - time.getTime() : parseInt(time);
 
         server.bans.create(user, {
-            deleteMessageSeconds,
-            reason1
+            deleteMessageSeconds: deleteMessageSeconds,
+            reason: reason1
         }).then(() => {
             if(time) {
                 let times = this.getData("time", cache.name, "block");

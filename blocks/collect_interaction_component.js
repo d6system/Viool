@@ -42,7 +42,7 @@ module.exports = {
     options: [
         {
             id: "type",
-            name: "Component Type",
+            name: "The Type of the Interaction",
             description: "Description: This will decide which interaction type the block will react to",
             type: "SELECT",
             options: {
@@ -64,16 +64,6 @@ module.exports = {
                 1: "Anyone",
                 2: "Specific User",
                 3: "Custom Code"
-            }
-        },
-        {
-            "id": "discomp",
-            "name": "Disable Component",
-            "description": "Disable Component after it was used.",
-            "type": "SELECT",
-            "options": {
-                true: "True/Yes",
-                false: "False/No"
             }
         }
     ],
@@ -102,7 +92,6 @@ module.exports = {
         const user = this.GetInputValue("user", cache);
         const target_type = parseInt(this.GetOptionValue("target_type", cache));
         const type = this.GetOptionValue("type", cache)
-        const discomp = this.GetOptionValue("discomp", cache);
         let result;
         switch (target_type) {
             case 2:
@@ -142,7 +131,7 @@ module.exports = {
 
         const collector = message.createMessageComponentCollector({
             filter: i => {
-                if (!discomp) i.deferUpdate();
+                //i.deferUpdate();
                 const user = i.user;
                 const member = i.member;
 
@@ -156,16 +145,6 @@ module.exports = {
             max: max_components
         })
         collector.on("collect", async i => {
-            if (discomp) {
-                let comps = i.message.components
-                let row = comps.find(x => x.components.includes(i.component))
-                const index = i.message.components.indexOf(row)
-                let comp = row.components.find(x => x == i.component)
-                comp.data.disabled = true;
-                comp.data.placeholder = comp.options.find(x => x.value == i.values[0]).label
-                comps[index] = row;
-                i.update({ components: comps })
-            }
             this.StoreOutputValue(i, "interaction", cache);
             this.RunNextBlock("action", cache);
         })

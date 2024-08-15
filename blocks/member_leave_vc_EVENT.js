@@ -3,7 +3,7 @@ module.exports = {
 
     description: "When a member leaves voice channel this block executes",
 
-    category: ".Daily's",
+    category: "Events",
 
     auto_execute: true,
 
@@ -46,22 +46,14 @@ module.exports = {
 
     code(cache) {
         this.events.on("voiceStateUpdate", (oldState, newState) => {
-            
             if(newState.channel === null || newState.channel !== oldState.channel && oldState.channel !== null) {
-
-                const member1 = newState.member;
-                const user1 = newState.member.user;
-                const guild = newState.member.guild;
-                const voice = oldState.channel;
-    
-                this.StoreOutputValue(member1, "memb", cache);
-                this.StoreOutputValue(user1, "user", cache);
-                this.StoreOutputValue(guild, "server", cache);
-                this.StoreOutputValue(voice, "vc", cache);
+                this.StoreOutputValue(newState.member, "memb", cache);
+                this.StoreOutputValue(newState.member.user, "user", cache);
+                this.StoreOutputValue(newState.guild, "server", cache);
+                this.StoreOutputValue(oldState.channel, "vc", cache);
                 this.RunNextBlock("action", cache);
 
             }
-        
         });
     }
 }

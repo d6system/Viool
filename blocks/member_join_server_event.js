@@ -63,35 +63,32 @@ module.exports = {
     ],
 
     code(cache) {
-        const { Events, Collection } = require("discord.js");
+        const {Events, Collection} = require("discord.js");
         const react = this.GetOptionValue("react", cache);
 
         const invites = new Collection();
 
-        const wait = require("timers/promises").setTimeout;
-
-        this.client.on("ready", async () => {
-            this.client.guilds.cache.forEach(async (guild) => {
-                const firstInvites = await guild.invites.fetch();
+        this.client.guilds.cache.forEach((guild) => {
+            guild.invites.fetch().then(firstInvites => {
                 invites.set(guild.id, new Collection(firstInvites.map((invite) => [invite.code, invite.uses])));
             });
         });
 
-        this.client.on("inviteDelete", (invite) => {
+        this.client.on(Events.InviteDelete, (invite) => {
             invites.get(invite.guild.id).delete(invite.code);
         });
 
-        this.client.on("inviteCreate", (invite) => {
+        this.client.on(Events.InviteCreate, (invite) => {
             invites.get(invite.guild.id).set(invite.code, invite.uses);
         });
 
-        this.client.on("guildCreate", (guild) => {
+        this.client.on(Events.GuildCreate, (guild) => {
             guild.invites.fetch().then(guildInvites => {
                 invites.set(guild.id, new Map(guildInvites.map((invite) => [invite.code, invite.uses])));
             })
         });
 
-        this.client.on("guildDelete", (guild) => {
+        this.client.on(Events.GuildDelete, (guild) => {
             invites.delete(guild.id);
         });
 
@@ -103,7 +100,8 @@ module.exports = {
                         const oldInvites = await invites.get(member.guild.id);
                         const invite = await newInvites.find(i => i.uses > oldInvites.get(i.code));
                         this.StoreOutputValue(invite, "invite", cache);
-                    } catch { }
+                    } catch {
+                    }
                     this.StoreOutputValue(member, "member", cache);
                     this.StoreOutputValue(member.user, "user", cache);
                     this.StoreOutputValue(member.guild, "guild", cache);
@@ -125,7 +123,8 @@ module.exports = {
                         const oldInvites = await invites.get(member.guild.id);
                         const invite = await newInvites.find(i => i.uses > oldInvites.get(i.code));
                         this.StoreOutputValue(invite, "invite", cache);
-                    } catch { }
+                    } catch {
+                    }
                     this.StoreOutputValue(member, "member", cache);
                     this.StoreOutputValue(member.user, "user", cache);
                     this.StoreOutputValue(member.guild, "guild", cache);

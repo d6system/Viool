@@ -27,7 +27,7 @@ module.exports = {
     ],
 
     async code(cache) {
-        const player = await this.getDependency("DiscordPlayer", cache).player;
+        const player = await this.getDependency("DiscordPlayer", cache, false).player;
         player.events.on("emptyQueue", (queue) => {
             this.StoreOutputValue(queue, "queue", cache);
             this.RunNextBlock("action", cache);

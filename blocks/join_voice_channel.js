@@ -3,7 +3,7 @@ module.exports = {
 
     description: "Joins the voice channel.",
 
-    category: "Audio Stuff",
+    category: ".Audio V2",
 
     inputs: [
         {
@@ -21,7 +21,20 @@ module.exports = {
         }
     ],
 
-    options: [],
+    options: [
+        {
+            "id": "deaf",
+            "name": "Deaf Bot?",
+            "description": "Description: Deaf Bot? (More Privacy)",
+            "type": "CHECKBOX"
+        },
+        {
+            "id": "mute",
+            "name": "Mute Bot?",
+            "description": "Description: Mute Bot? (More Privacy)",
+            "type": "CHECKBOX"
+        }
+    ],
 
     outputs: [
         {
@@ -29,28 +42,23 @@ module.exports = {
             "name": "Action",
             "description": "Type: Action\n\nDescription: Executes the following blocks when this block finishes its task.",
             "types": ["action"]
-        },
-        {
-            "id": "connection",
-            "name": "Connection",
-            "description": "Acceptable Types: Object, Unspecified\n\nDescription: The voice channel to join.",
-            "types": ["object", "unspecified"]
         }
     ],
 
     async code(cache) {
-
+        const { joinVoiceChannel } = await this.require('@discordjs/voice');
         const channel = this.GetInputValue("voice_channel", cache);
+        const deaf = this.GetOptionValue("deaf", cache) === "true";
+        const mute = this.GetOptionValue("mute", cache) === "true";
 
-        const { joinVoiceChannel } = require('@discordjs/voice');
-
-        const connection = await joinVoiceChannel({
+        await joinVoiceChannel({
             channelId: channel.id,
             guildId: channel.guild.id,
             adapterCreator: channel.guild.voiceAdapterCreator,
+            selfDeaf: deaf,
+            selfMute: mute
         });
 
-        this.StoreOutputValue(connection, "connection", cache)
         this.RunNextBlock("action", cache);
     }
 }

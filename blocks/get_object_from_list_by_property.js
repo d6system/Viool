@@ -41,7 +41,8 @@ module.exports = {
             "type": "SELECT",
             "options": {
                 "includes": "Includes",
-                "equals": "Equals"
+                "equals": "Equals",
+                "includeskey": "Includes Key[value]",
             }
         },
         {
@@ -79,13 +80,17 @@ module.exports = {
         const value = this.GetInputValue("value", cache) || this.GetOptionValue("value", cache);
         const method = this.GetOptionValue("method", cache);
 
+        let object;
+
         if (value || value !== "") {
             if (property || property !== "") {
                 if(method == "includes") {
                     object = list.find(x => x[property].includes(value))
-                } else {
-                    object = list.find(x => x[property] == (value))
+                }  else if(method == "equals") {
+                    object = list.find(x => x[property] === (value))
                 }
+            } else if(method == "includeskey") {
+                object = list.find(obj => Object.keys(obj).includes(value));
             }
         }
 

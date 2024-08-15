@@ -11,22 +11,36 @@ module.exports = {
         },
         {
             id: "options",
-            name: "Options",
-            description: "Type: List\n\nDescription: The Menu component(s) to add.",
-            types: ["list","unspecified"],
-            required: true
+            name: "Option",
+            description: "Type: List\n\nDescription: The Menu component to add (Maximum of 25).",
+            types: ["object", "unspecified"],
+            multiInput: true,
+            required: true,
+            maxInputs: 25
         },
         {
             id: "label",
             name: "Placeholder Label",
             description: "Description: The Label of the Menu that is seen before a selection occurs.",
-            types: ["text"]
+            types: ["text", "unspecified"]
         },
 		{
             id: "id",
             name: "ID of the Menu",
             description: "Description: The ID of the Menu.",
-            types: ["text"]
+            types: ["text", "unspecified"]
+        },
+		{
+            id: "maxvalues",
+            name: "Max Possible Selects",
+            description: "Description: The Amount of Selects possible. Default: 1",
+            types: ["number", "unspecified"]
+        },
+		{
+            id: "minvalues",
+            name: "Min Required Selects",
+            description: "Description: The Amount of Selects Needed. Default: 1",
+            types: ["number", "unspecified"]
         }
     ],
     options: [
@@ -34,13 +48,13 @@ module.exports = {
             id: "label",
             name: "Placeholder Label",
             description: "Description: The Label of the Menu that is seen before a selection occurs.",
-            type: "TEXT"
+            type: "text"
         },
 		{
             id: "id",
             name: "ID of the Menu",
             description: "Description: The ID of the Menu.",
-            type: "TEXT"
+            type: "text"
         }
     ],
     outputs: [
@@ -54,38 +68,45 @@ module.exports = {
             id: "menu",
             name: "Menu",
             description: "Description: The Menu Object.",
-            types: ["object"]
-        },
+            types: ["object", "unspecified"]
+        }
     ],
-    async code(cache) {
+    async code(cache, DBB) {
 
-        const { StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
+        const { StringSelectMenuBuilder } = require('discord.js');
 
-        var id = this.GetInputValue("id", cache);
-        var label = this.GetInputValue("label", cache);
-
-        if(id == undefined) {
-            id = this.GetOptionValue("id", cache);
-        }
-
-        if(label == undefined) {
-            label = this.GetOptionValue("label", cache);
-        }
-
+        var id = this.GetInputValue("id", cache) || this.GetOptionValue("id", cache);
+        var label = this.GetInputValue("label", cache) || this.GetOptionValue("label", cache);
         var options = this.GetInputValue("options", cache);
+        const maxvalues = parseInt(this.GetInputValue("maxvalues", cache)) || 1;
+        const minvalues = parseInt(this.GetInputValue("minvalues", cache)) || 1;
+
+        options = options.filter((option, index) => {
+            if (option && option.description == '') option.description = undefined;
+            if (option && (option.label !== '' && option.value !== '')) {
+                return true;
+            } else if (option) {
+                if (!option.label && !option.value) {
+                    DBB.Core.console("WARN", `The menu option #${index + 1} was removed from the 'Create Selection Menu' block (#${cache.index + 1}) as it does not have a label or a value`);
+                } else if (!option.label) {
+                    DBB.Core.console("WARN", `The menu option #${index + 1} was removed from the 'Create Selection Menu' block (#${cache.index + 1}) as it does not have a label`);
+                } else if (!option.value) {
+                    DBB.Core.console("WARN", `The menu option #${index + 1} was removed from the 'Create Selection Menu' block (#${cache.index + 1}) as it does not have a value`);
+                };
+            };
+        });
+
+        if (options.length > 25) {
+            options = options.slice(0, 25)
+            DBB.Core.console("WARN", `The 'Create Selection Menu' block (#${cache.index + 1}) has more than 25 options! The maximum number of options per menu is 25, so only the first 25 will be used.`);
+        };
 
         menu = new StringSelectMenuBuilder()
             .setCustomId(id)
             .setPlaceholder(label)
-            .addOptions()
-
-        options.forEach(option => {
-             if(typeof option !== 'undefined' || option !== null) {
-                const regex = /"/i;
-                var optiond = JSON.parse(JSON.stringify(option).replace('[', '').replace(']' ,''));
-                menu.addOptions(optiond);
-              }
-        });
+            .addOptions(options.flat())
+            .setMaxValues(maxvalues)
+            .setMinValues(minvalues)
 
         this.StoreOutputValue(menu, "menu", cache);
         this.RunNextBlock("action", cache);                

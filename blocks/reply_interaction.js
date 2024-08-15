@@ -27,9 +27,9 @@ module.exports = {
         },
         {
             id: "embeds",
-            name: "Embed",
-            description: "Description: The embed to reply with",
-            types: ["object", "unspecified"],
+            name: "Embed(s)",
+            description: "Description: The embed to reply with. Accepts: Object & List",
+            types: ["object", "list", "unspecified"],
         },
         {
             id: "row1",
@@ -77,6 +77,7 @@ module.exports = {
             type: "SELECT",
             options: {
                 "reply": "Reply with Message",
+                "update": "Update Message",
                 "edit": "Edit Reply Message",
                 "defer": "Defer Reply",
                 "fetch": "Fetch Reply",
@@ -216,7 +217,7 @@ module.exports = {
         switch (response) {
             case "reply":
                 if (em !== undefined) {
-                    message = await interaction.reply({ content: msg, embeds: [em], components: comps, files: attachment ? [attachment] : null, ephemeral: awnser, fetchReply: true });
+                    message = await interaction.reply({ content: msg, embeds: em ? Array.isArray(em) ? em : [em] : undefined, components: comps, files: attachment ? [attachment] : null, ephemeral: awnser, fetchReply: true });
                     this.StoreOutputValue(message, "message", cache);
                     this.RunNextBlock("action", cache)
                 } else {
@@ -231,9 +232,25 @@ module.exports = {
                     this.RunNextBlock("action", cache)
                 }
                 break;
+            case "update":
+                if (em !== undefined) {
+                    message = await interaction.update({ content: msg, embeds: em ? Array.isArray(em) ? em : [em] : undefined, components: comps, files: attachment ? [attachment] : null, ephemeral: awnser});
+                    this.StoreOutputValue(message, "message", cache);
+                    this.RunNextBlock("action", cache)
+                } else {
+                    message = await interaction.update({
+                        content: msg,
+                        components: comps,
+                        files: attachment ? [attachment] : null,
+                        ephemeral: awnser
+                        })
+                    this.StoreOutputValue(message, "message", cache);
+                    this.RunNextBlock("action", cache)
+                }
+                break;
             case "edit":
                 if (em !== undefined) {
-                    message = await interaction.editReply({ content: msg, embeds: [em], components: comps, files: attachment ? [attachment] : null, ephemeral: awnser, fetchReply: true });
+                    message = await interaction.editReply({ content: msg, embeds: em ? Array.isArray(em) ? em : [em] : undefined, components: comps, files: attachment ? [attachment] : null, ephemeral: awnser, fetchReply: true });
                     this.StoreOutputValue(message, "message", cache);
                     this.RunNextBlock("action", cache)
                 } else {
@@ -264,7 +281,7 @@ module.exports = {
                 break;
             case "follow":
                 if (em !== undefined) {
-                    message = await interaction.followUp({ content: msg, embeds: [em], components: comps, files: attachment ? [attachment] : null, ephemeral: awnser, fetchReply: true });
+                    message = await interaction.followUp({ content: msg, embeds: em ? Array.isArray(em) ? em : [em] : undefined, components: comps, files: attachment ? [attachment] : null, ephemeral: awnser, fetchReply: true });
                     this.StoreOutputValue(message, "message", cache);
                     this.RunNextBlock("action", cache)
                 } else {

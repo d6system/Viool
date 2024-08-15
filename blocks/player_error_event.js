@@ -33,8 +33,13 @@ module.exports = {
     ],
 
     async code(cache) {
-        const player = await this.getDependency("DiscordPlayer", cache).player;
+        const player = await this.getDependency("DiscordPlayer", cache, false).player;
         player.events.on("error", (queue, error) => {
+            this.StoreOutputValue(queue, "queue", cache);
+            this.StoreOutputValue(error, "error", cache);
+            this.RunNextBlock("action", cache);
+        })
+        player.events.on("playerError", (queue, error) => {
             this.StoreOutputValue(queue, "queue", cache);
             this.StoreOutputValue(error, "error", cache);
             this.RunNextBlock("action", cache);

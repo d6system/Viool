@@ -3,7 +3,7 @@ module.exports = {
 
     description: "When a member joins voice channel this block executes",
 
-    category: ".Daily's",
+    category: "Events",
 
     auto_execute: true,
 
@@ -45,25 +45,15 @@ module.exports = {
     ],
 
     code(cache) {
-        this.events.on("voiceStateUpdate", (newState) => {
-            
-            if(newState.member.voice.channel === null) {
-
-                
-
-            } else {
-            const member1 = newState.member;
-            const user1 = newState.member.user;
-            const guild = newState.member.guild;
-            const voice = newState.member.voice.channel;
-
-            this.StoreOutputValue(member1, "memb", cache);
-            this.StoreOutputValue(user1, "user", cache);
-            this.StoreOutputValue(guild, "server", cache);
-            this.StoreOutputValue(voice, "vc", cache);
-            this.RunNextBlock("action", cache);
+        this.events.on("voiceStateUpdate", (oldState, newState) => {
+            if (!oldState.member || !newState.member || !newState || !oldState) return;
+            if (oldState.channel !== newState.channel && newState.channel !== null) {
+                this.StoreOutputValue(newState.member, "memb", cache);
+                this.StoreOutputValue(newState.member.user, "user", cache);
+                this.StoreOutputValue(newState.guild, "server", cache);
+                this.StoreOutputValue(newState.channel, "vc", cache);
+                this.RunNextBlock("action", cache);
             }
-        
         });
     }
 }

@@ -52,7 +52,8 @@ module.exports = {
                 25: "Is Bot Able To Access The Text Channel? [Boolean]",
                 26: "Text Channel Invite List [List <Invite>]",
                 27: "Text Channel Webhook List [List <Webhook>]",
-                28: "Text Channel Mention [Text]"
+                28: "Text Channel Mention [Text]",
+                29: "Text Channel Threads [List]"
             }
         }
     ],
@@ -107,7 +108,7 @@ module.exports = {
                 result = text_channel.manageable;
                 break;
             case 10:
-                result = text_channel.members.fetch().cache;
+                result = Array.from(await text_channel.members.values());
                 break;
             case 11:
                 let messages = await text_channel.messages.fetch();
@@ -157,6 +158,9 @@ module.exports = {
                 break;
             case 28:
                 result = text_channel.toString();
+                break;
+            case 29:
+                result = await text_channel.threads.fetch();
                 break;
         }
 

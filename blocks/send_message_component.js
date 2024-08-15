@@ -27,7 +27,7 @@ module.exports = {
         },
         {
             id: "embed",
-            name: "Embed",
+            name: "Embed(s)",
             description: "Acceptable Types: Object, Unspecified\n\nDescription: The embed to add to the message",
             types: ["object", "list", "unspecified"],
         },
@@ -66,9 +66,13 @@ module.exports = {
             name: "Attachment",
             description: "Acceptable Types: Object, Text, Unspecified\n\nDescription: The attachment to put in the message. Supports Image, file path and URL. (OPTIONAL)",
             types: ["object", "text", "unspecified"]
+        },
+        {
+            id: "poll",
+            name: "Poll",
+            description: "Acceptable Types: Object, Unspecified\n\nDescription: The poll to send with the message.",
+            types: ["object", "unspecified"]
         }
-        
-        
     ],
 
     options: [
@@ -80,6 +84,16 @@ module.exports = {
             "options": {
                 "send": "Send in Channel",
                 "reply": "Reply to Message"
+            }
+        },
+        {
+            "id": "silent",
+            "name": "Silent Message",
+            "description": "Description: Prevents users from getting a notification.",
+            "type": "SELECT",
+            "options": {
+                undefined: "False",
+                "true": "True"
             }
         }
     ],
@@ -96,12 +110,24 @@ module.exports = {
             name: "Message",
             description: "Description: The message that was sent.",
             types: ["object", "list", "unspecified"]
+        },
+        {
+            id: "action_err",
+            name: "Action Error",
+            description: "Type: Action\n\nDescription: Executes the following blocks when an error occurs.",
+            types: ["action"]
+        },
+        {
+            id: "message_err",
+            name: "Error",
+            description: "Description: The Error Message.",
+            types: ["text", "unspecified"]
         }
     ],
 
     async code(cache) {
         
-        const { ActionRowBuilder } = require('discord.js');
+        const { ActionRowBuilder, MessageFlags } = require('discord.js');
 
         const channel = this.GetInputValue("channel", cache);
         const msg = this.GetInputValue("text", cache);
@@ -112,15 +138,21 @@ module.exports = {
         const comp4 = this.GetInputValue("row4", cache);
         const comp5 = this.GetInputValue("row5", cache);
         const file = this.GetInputValue("file", cache);
+        const poll = this.GetInputValue("poll", cache);
         const type = this.GetOptionValue("type", cache);
+        const silent = this.GetOptionValue("silent", cache);
         let comps = []
         let Components;
         let components1
         let components2
         let components3
         let components4
-        let components5        
-       
+        let components5
+        let flags;
+        if (silent === "true") {
+            flags = MessageFlags.SuppressNotifications;
+        }
+
 
         if(comp1 && Array.isArray(comp1)) {
             components1 = new ActionRowBuilder()
@@ -187,19 +219,33 @@ module.exports = {
         }
 
         if(type == "send") {
-            channel.send({ content: msg ? msg : undefined, embeds: embed ? [embed] : undefined, files: file ? [file] : undefined, components: comps ? comps : undefined}).then( msg => {
+            channel.send({ flags: flags,
+                content: msg ? msg : undefined,
+                embeds: embed ? Array.isArray(embed) ? embed : [embed] : undefined,
+                files: file ? [file] : undefined,
+                components: comps ? comps : undefined,
+                poll: poll ? poll : undefined
+            }).then( msg => {
                 this.StoreOutputValue(msg, "message", cache);
                 this.RunNextBlock("action", cache);
-                return
-            })
-
+            }).catch(err => {
+                    this.StoreOutputValue(err.message, "message_err", cache);
+                    this.RunNextBlock("action_err", cache);
+                })
         } else {
-            channel.reply({ content: msg ? msg : undefined, embeds: embed ? [embed] : undefined, files: file ? [file] : undefined, components: comps ? comps : undefined}).then( mag => {
+            channel.reply({ flags: flags,
+                content: msg ? msg : undefined,
+                embeds: embed ? Array.isArray(embed) ? embed : [embed] : undefined,
+                files: file ? [file] : undefined,
+                components: comps ? comps : undefined,
+                poll: poll ? poll : undefined
+            }).then( msg => {
                 this.StoreOutputValue(msg, "message", cache);
                 this.RunNextBlock("action", cache);
-                return
-            })
-
+            }).catch(err => {
+                    this.StoreOutputValue(err.message, "message_err", cache);
+                    this.RunNextBlock("action_err", cache);
+                })
         }
     }
 }

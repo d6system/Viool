@@ -38,9 +38,8 @@ module.exports = {
                 9: "Is Message Editable By The Bot? [Boolean]",
                 10: "Message Edited At [Date]",
                 11: "Cached Edited Message List [List <Message>]",
-                12: "Message Embed [Single Embed]",
-                13: "Message Embed List [List <Message Embed>]",
-                14: "Message Server [Server]",
+                12: "Message Embed List [List <Message Embed>]",
+                13: "Message Server [Server]",
                 15: "Message ID [Text]",
                 16: "Message Author [Member]",
                 17: "Message Channel Mention List [List <Channel>]",
@@ -65,7 +64,9 @@ module.exports = {
                 36: "Is Message Replying? [Boolean]",
                 37: "Message Reply Guild ID [Text]",
                 38: "Message Reply Channel ID [Text]",
-                39: "Message Reply Message ID [Text]",                
+                39: "Message Reply Message ID [Text]",
+                40: "Has Massage a Thread? [Boolean]",
+                41: "Message Thread [Object <Thread Channel>]"
             }
         }
     ],
@@ -125,13 +126,9 @@ module.exports = {
                 result = message.edits;
                 break;
             case 12:
-                embeds = message.embeds;           
-                result = embeds[0];
-                break;
-            case 13:
                 result = message.embeds;
                 break;
-            case 14:
+            case 13:
                 result = message.guild;
                 break;
             case 15:
@@ -212,7 +209,13 @@ module.exports = {
                 break;
             case 39:
                 result = message.reference.messageId;                      
-                break;            
+                break;
+            case 40:
+                result = message.hasThread;
+                break;
+            case 41:
+                result = message.thread;
+                break;
         }
 
         this.StoreOutputValue(result, "result", cache);

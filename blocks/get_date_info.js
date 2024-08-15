@@ -76,10 +76,12 @@ module.exports = {
         const date_info = parseInt(this.GetOptionValue("date_info", cache));
         const time_type = this.GetOptionValue("time_type", cache) == "utc" ? "UTC" : "";
 
-        let result;
+        let result; 
         switch(date_info) {
             case 1:
                 result = date["get" + time_type + "Time"]();
+                result = date / 1000
+                result = Math.trunc(result)
                 break;
             case 2:
                 result = ({
@@ -126,19 +128,19 @@ module.exports = {
             case 9:
                 result = date.toLocaleString(undefined, {timeZone: time_type || undefined});
                 break;
-            case 9:
+            case 10:
                 result = date["get" + time_type + "Hours"]();
                 break;
-            case 10:
+            case 11:
                 result = date["get" + time_type + "Minutes"]();
                 break;
-            case 11:
+            case 12:
                 result = date["get" + time_type + "Seconds"]();
                 break;
-            case 12:
+            case 13:
                 result = date["get" + time_type + "Milliseconds"]();
                 break;
-            case 13:
+            case 14:
                 result = "GMT" + date.slice(28, 29) + parseInt(date.slice(29, 33)) / 100;
                 break;
         }

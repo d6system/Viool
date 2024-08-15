@@ -28,7 +28,7 @@ module.exports = {
             "id": "action",
             "name": "Action",
             "description": "Acceptable Types: Action\n\nDescription: Executes the following blocks when this block finishes its task.",
-            "types": ["action"]
+            "types": ["action"] 
         }
     ],
 

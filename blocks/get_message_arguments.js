@@ -93,25 +93,25 @@ module.exports = {
                 break;
             case "mentioned_user":
                 if(message.mentions.users.size) {
-                    const users = message.mentions.users.array();
+                    const users = Array.from(message.mentions.users.values());
                     if(users[argument_number - 1]) result = users[argument_number - 1];
                 }
                 break;
             case "mentioned_member":
                 if(message.mentions.members.size) {
-                    const members = message.mentions.members.array();
+                    const members = Array.from(message.mentions.members.values());
                     if(members[argument_number - 1]) result = members[argument_number - 1];
                 }
                 break;
             case "mentioned_role":
                 if(message.mentions.roles.size) {
-                    const roles = message.mentions.roles.array();
+                    const roles = Array.from(message.mentions.roles.values());
                     if(roles[argument_number - 1]) result = roles[argument_number - 1];
                 }
                 break
             case "mentioned_channel":
                 if(message.mentions.channels.size) {
-                    const channels = message.mentions.channels.array();
+                    const channels = Array.from(message.mentions.channels.values());
                     if(channels[argument_number - 1]) result = channels[argument_number - 1];
                 }
                 break;

@@ -3,7 +3,7 @@ module.exports = {
 
     description: "Edits the embed to insert into a message.",
 
-    category: ".MOD",
+    category: "Message Embed Stuff",
 
     inputs: [
         {
@@ -89,7 +89,21 @@ module.exports = {
             "id": "timestamp",
             "name": "Timestamp (Date)",
             "description": "Acceptable Types: Date, Number, Unspecified\n\nDescription: The new timestamp (Date) for this message embed. If a boolean as \"true\", this uses the current time. (OPTIONAL)",
-            "types": ["date", "number", "unspecified"]
+            "types": ["date", "number", "boolean", "unspecified"]
+        },
+        {
+            "id": "object",
+            "name": "Object",
+            "description": "Acceptable Types: Object, List.\n\nDescription: The object(s) where to get your values from.\n\nYou can merge several objects. But take in mind if you have repeated keys; they will overwrite.",
+            "types": ["object", "list", "unspecified"],
+            "multiInput": true
+        },
+        {
+            "id": "text",
+            "name": "Text",
+            "description": "Acceptable Types: Text, Undefined, Null, Object, Boolean, Date, Number, List, Unspecified\n\nDescription: The text to merge with the source text. Supports everything (converts to text automatically). (OPTIONAL)",
+            "types": ["text", "undefined", "null", "object", "boolean", "date", "number", "list", "unspecified"],
+            "multiInput": true
         }
     ],
 
@@ -163,11 +177,12 @@ module.exports = {
 		{
             "id": "timestamp",
             "name": "Timestamp (Date)",
-            "description": "Acceptable Types: Date, Number, Boolean, Unspecified\n\nDescription: The timestamp (Date) for this message embed. If a boolean as \"true\", this uses the current time. (OPTIONAL)",
+            "description": "Description: The timestamp (Date) for this message embed.\nTrue: Adds/Keeps timestamp // False: Removes timestamp.",
             "type": "SELECT",
-            "options": {                
-                "false": "False",                
-                "true": "True",
+            "options": {   
+                "inherit": "No Change",
+                "true": "True",             
+                "false": "False",
             }
         }		
 	],
@@ -188,78 +203,110 @@ module.exports = {
     ],
 
     code: function(cache) {
-        const { EmbedBuilder } = require('discord.js');
-        const color_input = this.GetInputValue("color", cache, false, "#2f3136");        
-        const thumbnail_input = this.GetInputValue("thumbnail", cache, true);
-        const author_icon_input = this.GetInputValue("author_icon", cache);
-        const author_name_input = this.GetInputValue("author_name", cache);
-        const author_url_input = this.GetInputValue("author_url", cache);
-        const title_input = this.GetInputValue("title", cache, true);
-        const url_input = this.GetInputValue("url", cache, true);
-        const description_input = this.GetInputValue("description", cache, true);
-        const image_input = this.GetInputValue("image", cache, true);
-        const footer_icon_input = this.GetInputValue("footer_icon", cache);
-        const footer_text_input = this.GetInputValue("footer_text", cache);
-        const timestamp_input = this.GetInputValue("timestamp", cache, true);
+        const { EmbedBuilder, time } = require('discord.js');
+        var message_embed = this.GetInputValue("message_embed", cache);
 
+        const variables = this.GetInputValue("text", cache);
+        const objects = this.GetInputValue("object", cache);   
+        let object;          
+        if(objects.length == 1){
+            if(Array.isArray(objects[0])){
+                object = Object.assign({}, ...objects[0]);
+            }else{object = objects[0];}
+        }else{
+            object = Object.assign({}, ...objects);
+        } 
+
+        const color_input = this.GetInputValue("color", cache, false, "#2f3136");     
         const color_option = this.GetOptionValue("color", cache) !== "#000000" ? this.GetOptionValue("color", cache) : null;
-        const thumbnail_option = this.GetOptionValue("thumbnail", cache) !== '' ? this.GetOptionValue("thumbnail", cache, true) : undefined;
-        const author_icon_option = this.GetOptionValue("author_icon", cache) !== '' ? this.GetOptionValue("author_icon", cache) : undefined;
-        const author_name_option = this.GetOptionValue("author_name", cache) !== '' ? this.GetOptionValue("author_name", cache) : undefined;
-        const author_url_option = this.GetOptionValue("author_url", cache) !== '' ? this.GetOptionValue("author_url", cache) : undefined;
-        const title_option = this.GetOptionValue("title", cache) !== '' ? this.GetOptionValue("title", cache, true) : undefined;
-        const url_option = this.GetOptionValue("url", cache) !== '' ? this.GetOptionValue("url", cache, true) : undefined;
-        const description_option = this.GetOptionValue("description", cache) !== '' ? this.GetOptionValue("description", cache, true) : undefined;
-        const image_option = this.GetOptionValue("image", cache) !== '' ? this.GetOptionValue("image", cache, true) : undefined;
-        const footer_icon_option = this.GetOptionValue("footer_icon", cache) !== '' ? this.GetOptionValue("footer_icon", cache) : undefined;
-        const footer_text_option = this.GetOptionValue("footer_text", cache) !== '' ? this.GetOptionValue("footer_text", cache) : undefined;
+        const color = color_input !== "#2f3136" ? color_input : color_option;       
 
-        let timestamp_option = this.GetOptionValue("timestamp", cache); 
-        if(timestamp_option == "true") { timestamp_option = true; }
-    	else { timestamp_option = false; }
+        const thumbnail_url = this.GetInputValue("thumbnail", cache) || this.GetOptionValue("thumbnail", cache, false, undefined);
+        const author_icon = this.GetInputValue("author_icon", cache) || this.GetOptionValue("author_icon", cache, false, undefined);
+        const author_name = this.GetInputValue("author_name", cache) || this.GetOptionValue("author_name", cache, false, undefined);
+        const author_url = this.GetInputValue("author_url", cache) || this.GetOptionValue("author_url", cache, false, undefined);
+        const title = this.GetInputValue("title", cache) || this.GetOptionValue("title", cache, false, undefined);
+        const title_url = this.GetInputValue("url", cache) || this.GetOptionValue("url", cache, false, undefined);
+        const description = this.GetInputValue("description", cache) || this.GetOptionValue("description", cache, false, undefined);
+        const image_url = this.GetInputValue("image", cache) || this.GetOptionValue("image", cache, false, undefined);
+        const footer_icon = this.GetInputValue("footer_icon", cache) || this.GetOptionValue("footer_icon", cache, false, undefined);
+        const footer_text = this.GetInputValue("footer_text", cache) || this.GetOptionValue("footer_text", cache, false, undefined);
 
-        const message_embed = this.GetInputValue("message_embed", cache);
-        const color = color_input !== "#2f3136" ? color_input : color_option;
-        const thumbnail = thumbnail_input !== undefined ? thumbnail_input : thumbnail_option;
-        const author_icon = author_icon_input !== undefined ? author_icon_input : author_icon_option;
-        const author_name = author_name_input !== undefined ? author_name_input : author_name_option;
-        const author_url = author_url_input !== undefined ? author_url_input : author_url_option;
-        const title = title_input !== undefined ? title_input : title_option;        
-        const url = url_input !== undefined ? url_input : url_option;
-        const description = description_input !== undefined ? description_input : description_option;
-        const image = image_input !== undefined ? image_input : image_option;
-        const footer_icon = footer_icon_input !== undefined ? footer_icon_input : footer_icon_option;
-        const footer_text = footer_text_input !== undefined ? footer_text_input : footer_text_option;        
-        const timestamp = timestamp_input !== undefined ? timestamp_input : timestamp_option;           
+        var timestamp = this.GetInputValue("timestamp", cache) || this.GetOptionValue("timestamp", cache);              
 
-        const embed = EmbedBuilder.from(message_embed)
-        if(color) {embed.setColor(color)} else {embed.setColor(message_embed['data'].color)};
-        if(thumbnail) {embed.setThumbnail(thumbnail)} else {message_embed['data'].hasOwnProperty('thumbnail') ? embed.setThumbnail(message_embed['data'].thumbnail.url) : ""};              
-        if(author_icon || author_name || author_url) {
-            embed.setAuthor({
-            name: author_name || "\u200b",
-            url: author_url,
-            iconURL: author_icon
-        })} else {message_embed['data'].hasOwnProperty('author') ? embed.setAuthor({
-            name: message_embed['data'].author.hasOwnProperty('name') ? message_embed['data'].author.name : "\u200b",
-            url: message_embed['data'].author.hasOwnProperty('url') ? message_embed['data'].author.url : null,
-            iconURL: message_embed['data'].author.hasOwnProperty('icon_url') ? message_embed['data'].author.icon_url : null 
-        }) : ""};
-        if(title) {embed.setTitle(title.value)} else {message_embed['data'].hasOwnProperty('title') ? embed.setTitle(message_embed['data'].title) : ""};
-        if(url) {embed.setURL(url.value)} else {message_embed['data'].hasOwnProperty('url') ? embed.setURL(message_embed['data'].url) : ""};
-        if(description) {embed.setDescription(description.value)} else {message_embed['data'].hasOwnProperty('description') ? embed.setDescription(message_embed['data'].description) : ""};
-        if(image) {embed.setImage(image.value)} else {message_embed['data'].hasOwnProperty('image') ? embed.setImage(message_embed['data'].image.url) : ""};
-        if(footer_icon || footer_text) {
-            embed.setFooter({
-            text: footer_text || "\u200b",
-            iconURL: footer_icon
-        })} else {message_embed['data'].hasOwnProperty('footer') ? embed.setFooter({
-            text: message_embed['data'].footer.hasOwnProperty('text') ? message_embed['data'].footer.text : "\u200b",
-            iconURL: message_embed['data'].footer.hasOwnProperty('icon_url') ? message_embed['data'].footer.icon_url : null
-        }) : ""};
-        if(timestamp) {embed.setTimestamp(timestamp.value)} else {message_embed['data'].hasOwnProperty('timestamp') ? embed.setTimestamp(message_embed['data'].timestamp.value) : ""};
+        let footer = {};
+        if (footer_text) {footer.text = footer_text}
+        if (footer_icon) {footer.iconURL = footer_icon}
 
-        this.StoreOutputValue(embed, "message_embed", cache);
+        let author = {};
+        if (author_name) {author.name = author_name}
+        if (author_icon) {author.iconURL = author_icon}
+        if (author_url) {author.url = author_url}
+
+        let image = {}
+        if(image_url) image.url = image_url;
+
+        let thumbnail = {}
+        if(thumbnail_url) thumbnail.url = thumbnail_url;
+
+        let embedConstructor = {};
+        if(author_icon || author_name || author_url) embedConstructor.author = author;
+        if(title) embedConstructor.title = (title || "\u200b");
+        if(title_url) embedConstructor.url = (title_url || "\u200b");
+        if(description) embedConstructor.description = (description || "\u200b");        
+        if(image_url) embedConstructor.image = (image || "\u200b");
+        if(thumbnail_url) embedConstructor.thumbnail = (thumbnail || "\u200b");
+        if(footer_icon || footer_text) embedConstructor.footer = (footer);
+
+        const string = JSON.stringify(embedConstructor);
+
+        const transform_texts =
+            string.replace(/\${text(\d+)}/g, function(match, number) {
+                return String(variables[number - 1] || match);
+            }).replace(/\n/g, '\\n')
+
+            const transform_keys = transform_texts.replace(/\${([^\s{}]+)}/g, function(match, key) {
+                const keys = key.split('.');            
+                let value = object;
+                for (const k of keys) {
+                  if (value.hasOwnProperty(k)) {
+                    value = value[k]
+                    if (typeof value === 'string') {
+                            value = (value.replace(/\n/g, '\\n')).replace(/"/g, '\\"');
+                    }                
+                  } else {
+                    return "";
+                  }
+                }            
+                return value;
+            });
+
+        
+        const EmbedEdited = JSON.parse(transform_keys); 
+        
+        if(!message_embed.data){
+            message_embed = EmbedBuilder.from(message_embed);
+            message_embed.data = {
+                ...message_embed.data,
+                ...EmbedEdited
+            }
+        }else{
+            message_embed.data ={
+                ...message_embed.data,
+                ...EmbedEdited
+            }
+        }
+        
+        if (color) message_embed.setColor(color);
+        if (timestamp == true || timestamp == "true"){
+            timestamp = undefined;
+            message_embed.setTimestamp(timestamp);
+        }
+        else if(timestamp == false || timestamp == "false"){  
+            message_embed.setTimestamp(null);
+        }else{}
+        
+        this.StoreOutputValue(message_embed, "message_embed", cache);        
         this.RunNextBlock("action", cache);
     }
 }

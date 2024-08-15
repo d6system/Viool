@@ -95,7 +95,7 @@ module.exports = {
             color: role_color,
             hoist: role_hoist,
             position: role_position,
-            permissions: role_permissions.hasOwnProperty("allow") ? role_permissions.allow : role_permissions,
+            permissions: role_permissions && role_permissions.hasOwnProperty("allow") ? role_permissions.allow : role_permissions,
             mentionable: role_mentionable,
             reason: reason
         }
