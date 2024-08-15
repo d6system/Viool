@@ -185,7 +185,9 @@ module.exports = {
         if(Boolean(devmode)) DBB.Core.console("INFO", "Registering Extractors...")
         const { YoutubeiExtractor } = require("discord-player-youtubei")
         await DBB.Dependencies.DiscordPlayer.player.extractors.loadDefault((ext) => ext !== 'YouTubeExtractor');
-        await DBB.Dependencies.DiscordPlayer.player.extractors.register(YoutubeiExtractor, {});
+        await DBB.Dependencies.DiscordPlayer.player.extractors.register(YoutubeiExtractor, {
+            overrideBridgeMode : "yt"
+        });
         if(Boolean(devmode)) DBB.Core.console("SUCCESS", "Registered Extractors Successfully!")
     },
 
